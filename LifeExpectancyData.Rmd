@@ -19,6 +19,7 @@ library(ggthemes)
 library(raster)
 library(spData)
 library(readxl)
+library(plotly)
 library(flexdashboard)
 ```
 
@@ -68,16 +69,28 @@ dta <- left_join(dta_esp, dta_dep, by = c("ISO3","Year"))
 dta <- left_join(dta, dta_GDP, by = c("ISO3","Year"))
 ```
 
-# Visu 1 : carte
-
 Calcul des différences des espérance de vie.
 
 ```{r}
+# Country
 dta.diff <- dta %>% 
   group_by(Country) %>%
   summarise(Life.expectancy.diff = Life.expectancy[Year=='2015'] - Life.expectancy[Year=='2000']) %>%
   arrange(Life.expectancy.diff)
+
+# ISO3
+dta.diff.ISO3 <- dta %>% 
+  group_by(ISO3) %>%
+  summarise(Life.expectancy.diff = Life.expectancy[Year=='2015'] - Life.expectancy[Year=='2000'],
+            Country = Country,
+            Life.expectancy.2000 = Life.expectancy[Year=='2000'],
+            Life.expectancy.2015 = Life.expectancy[Year=='2015'])
+
 ```
+
+# Visu 1 : carte
+
+## Version ggplot
 
 Préparation des données qui concernent la latitude et la longitude.
 
@@ -115,6 +128,7 @@ world_map[world_map$Country == "Tanzania",]$Country = "United Republic of Tanzan
 world_map[world_map$Country == "USA",]$Country = "United States of America"
 world_map[world_map$Country == "Venezuela",]$Country = "Venezuela (Bolivarian Republic of)"
 world_map[world_map$Country == "Vietnam",]$Country = "Viet Nam"
+setdiff(dta$Country, world_map$Country)
 
 life.exp.map <- left_join(dta.diff, world_map, by = "Country")
 n_distinct(life.exp.map[,1])
@@ -125,11 +139,15 @@ Compute the centroid as the mean longitude and lattitude used as label coordinat
 ```{r}
 position <- world_map %>%
   group_by(Country) %>%
-  summarise(long = mean(long), lat = mean(lat))
+  summarise(long = mean(long), lat = mean(lat)) 
+
+dta.2015 <- dta %>% 
+  filter(Year=="2015")
+
+position.map <- left_join(dta.2015, position, by = "Country")
 ```
 
-
-Carte.
+Carte statique (ggplot).
 
 ```{r}
 ggplot(life.exp.map, aes(long, lat))+
@@ -144,7 +162,7 @@ ggplot(life.exp.map, aes(long, lat))+
   
   labs(fill='Diff', # titre de la légende
        title="Différence des espérance de vie (2015-2000)" # ajout du titre
-       ) +
+  ) +
   
   theme(axis.line = element_blank(), # enlever les axes 
         
@@ -153,73 +171,39 @@ ggplot(life.exp.map, aes(long, lat))+
         axis.text = element_blank(), # enlever les labels des axes
         
         plot.title = element_text(hjust = 0.5) # centrer le titre
-        ) + 
+  ) + 
   
   scale_fill_viridis_c(option = "C") +
   
-  geom_text(aes(label = Country), data = position,  size = 3, hjust = 0.5)
+  geom_text(aes(label = Life.expectancy), data = position.map,  size = 3, hjust = 0.5, col="white")
 ```
 
+## Version plotly
 
-# Visu 2 : trajectoires des Pays
-
-```{r, warning=F}
-# Trajectoires des espérances de vie des différents pays
-ggplot(data = dta, 
-       aes(x = Year, y = Life.expectancy, group = Country)) + 
-  
-  geom_line(aes(color = Country)) +
-  
-  geom_point(aes(color = Country)) +
-  
-  theme(legend.position = "none")  # pas de légende
-
-
-# Trajectoires des GDP des différents pays
-ggplot(data = dta, 
-       aes(x = Year, y = round(GDP), group = Country)) + 
-  
-  geom_line(aes(color = Country)) +
-  
-  geom_point(aes(color = Country)) +
-  
-  theme(legend.position = "none")  # pas de légende
-
-# Trajectoires des depenses des différents pays
-ggplot(data = dta, 
-       aes(x = Year, y = round(Depense), group = Country)) + 
-  
-  geom_line(aes(color = Country)) +
-  
-  geom_point(aes(color = Country)) +
-  
-  theme(legend.position = "none")  # pas de légende
-```
-Proposition Amélie.
+Carte interactive (plot_ly).
 
 ```{r}
-dta.2015 <- dta %>% 
-  filter(Year=="2015")
+fig <- plot_ly(dta.diff.ISO3, 
+               
+               type = 'choropleth', 
+               
+               locations = dta.diff.ISO3$ISO3, 
+               
+               z = dta.diff.ISO3$Life.expectancy.diff, 
+               
+               text = paste("Pays : ", dta.diff.ISO3$Country, '<br>', 
+                            "Esperance de vie en 2000 : ", dta.diff.ISO3$Life.expectancy.2000, '<br>', 
+                            "Esperance de vie en 2015 : ", dta.diff.ISO3$Life.expectancy.2015, '<br>', 
+                            "Difference : ", dta.diff.ISO3$Life.expectancy.diff), 
+               
+               colorscale = "YlGnBu",
+               
+               hoverinfo = 'text')
 
-ggplot(data = dta.2015, 
-       aes(x = Depense, y = Life.expectancy))+
-  geom_point()
-
-ggplot(data = dta.2015, 
-       aes(x = GDP, y = Life.expectancy))+
-  geom_point()
-
-dta.diff <- dta %>% 
-  group_by(ISO3) %>%
-  summarise(Life.expectancy.diff = Life.expectancy[Year=='2015'] - Life.expectancy[Year=='2000'], Depense.diff = Depense[Year=='2015'] - Depense[Year=='2000'], GDP.diff = GDP[Year=='2015'] - GDP[Year=='2000']) %>%
-  arrange(Life.expectancy.diff)
-
-ggplot(data = dta.diff, 
-       aes(x = Depense.diff, y = Life.expectancy.diff))+
-  geom_point()
-
-ggplot(data = dta.diff, 
-       aes(x = GDP.diff, y = Life.expectancy.diff))+
-  geom_point()
+fig %>% 
+  colorbar(title =  "Différence de \n l'espérance de vie \n entre 2015 et 2000")%>% 
+  layout(title = "Différence de l'espérance de vie (2015-2000)",
+         legend = list(zanchor = "middle"))
 ```
+
 
