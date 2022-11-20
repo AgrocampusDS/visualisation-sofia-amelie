@@ -1,7 +1,7 @@
 ---
-title: "Projet Visualisation"
-author: "Sofia Chemolli & Amélie Rivet"
-output: pdf_document
+title: "LifeExpectancy"
+author: "Amélie & Sofia"
+output: html_document
 ---
 
 # Création du jeu de données.
@@ -12,7 +12,6 @@ Importation des packages.
 library(ggplot2)
 library(tidyverse)
 library(dplyr)
-library(readxl)
 library(plotly)
 library(flexdashboard)
 ```
@@ -20,73 +19,97 @@ library(flexdashboard)
 Importation des données.
 
 ```{r}
-# Espérance de vie
-dta_esp <- read.csv("LifeExpectancyData.csv", stringsAsFactors = T)
-dta_esp$Year <- as.factor(dta_esp$Year)
-dta_esp <- dta_esp[,c(1,2,4)]
+# Espérance de vie a la naissance
+dta_off <- read.csv("Dta_off.csv", sep=",", stringsAsFactors = T)
+dta_off <- dta_off[,3:23]
+colnames(dta_off) <- c("Country","ISO3","2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018")
+
+dta_off <- dta_off %>% 
+  pivot_longer(c("2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018"))
+colnames(dta_off)[3:4] <- c("Year", "Life.expectancy")
+dta_off$Year <- as.factor(dta_off$Year)
+
+dta_off <- dta_off[-c(4558:nrow(dta_off)),]
 
 
-# Codes ISO3
-code <- read_excel("CodeISO3.xlsx")
-code$ISO3 <- as.factor(code$ISO3)
-
-
-# GDP
-dta_GDP <- read.csv("GDP_data.csv", sep=",", stringsAsFactors = T)
-dta_GDP <- dta_GDP[,4:20]
-colnames(dta_GDP) <- c("ISO3","2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015")
+# GDP par habitant
+dta_GDP <- read.csv("GDPDataBank.csv", sep=",", stringsAsFactors = T)
+dta_GDP <- dta_GDP[,4:23]
+colnames(dta_GDP) <- c("ISO3","2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018")
 
 dta_GDP <- dta_GDP %>% 
-  pivot_longer(c("2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015"))
+  pivot_longer(c("2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018"))
 colnames(dta_GDP)[2:3] <- c("Year", "GDP")
 dta_GDP$Year <- as.factor(dta_GDP$Year)
 
 
-# Dépensés par personne
-dta_dep <- read.csv("Dep_data.csv", sep=",", stringsAsFactors = T)
-dta_dep <- dta_dep[,4:20]
-colnames(dta_dep) <- c("ISO3","2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015")
+# Dépenses sante % GDP
+dta_dep <- read.csv("HealthExpDataBank.csv", sep=",", stringsAsFactors = T)
+dta_dep <- dta_dep[,4:23]
+colnames(dta_dep) <- c("ISO3","2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018")
 
 dta_dep <- dta_dep %>% 
-  pivot_longer(c("2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015"))
+  pivot_longer(c("2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018"))
 colnames(dta_dep)[2:3] <- c("Year", "Depense")
 dta_dep$Year <- as.factor(dta_dep$Year)
+
+
+# Anemie chez les enfants
+dta_anemia <- read.csv("WHO_anemia.csv", sep=';', dec=',', stringsAsFactors = T)
+dta_anemia$Year <- as.factor(dta_anemia$Year)
+
+
+# Acces a l'eau potable
+dta_water <- read.csv("WaterDataBank.csv", sep=",", stringsAsFactors = T)
+dta_water <- dta_water[,4:23]
+colnames(dta_water) <- c("ISO3","2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015", "2016","2017","2018")
+
+dta_water <- dta_water %>% 
+  pivot_longer(c("2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015", "2016","2017","2018"))
+colnames(dta_water)[2:3] <- c("Year", "Water")
+dta_water$Year <- as.factor(dta_water$Year)
 ```
 
 Merge des jeux de données.
 
 ```{r}
-dta_esp <- left_join(dta_esp, code, by = "Country")
-
-dta <- left_join(dta_esp, dta_dep, by = c("ISO3","Year"))
+dta <- left_join(dta_off, dta_dep, by = c("ISO3","Year"))
 
 dta <- left_join(dta, dta_GDP, by = c("ISO3","Year"))
+
+dta <- left_join(dta, dta_anemia[,-2], by = c("ISO3","Year"))
+
+dta <- left_join(dta, dta_water, by = c("ISO3","Year"))
 ```
 
 Calcul des différences des espérance de vie.
 
 ```{r}
-# Country
+# Amélie
 dta.diff <- dta %>% 
   group_by(ISO3) %>%
-  summarise(Life.expectancy.diff = Life.expectancy[Year=='2015'] - Life.expectancy[Year=='2000'], 
-            Depense.diff = Depense[Year=='2015'] - Depense[Year=='2000'], 
-            GDP.diff = GDP[Year=='2015'] - GDP[Year=='2000']) %>%
+  summarise(Life.expectancy.diff = Life.expectancy[Year=='2018'] - Life.expectancy[Year=='2000'], 
+            Depense.diff = Depense[Year=='2018'] - Depense[Year=='2000'], 
+            GDP.diff = GDP[Year=='2018'] - GDP[Year=='2000'],
+            Anemie.diff = Anemie[Year=='2018'] - Anemie[Year=='2000'], 
+            Water.diff = Water[Year=='2018'] - Water[Year=='2000']) %>%
   arrange(Life.expectancy.diff)
 
-# ISO3
-dta.diff.ISO3 <- dta %>% 
+# Sofia
+diff.ISO3 <- dta_off %>% 
+  filter(Year==2000 | Year==2018) %>% 
   group_by(ISO3) %>%
-  summarise(Life.expectancy.diff = Life.expectancy[Year=='2015'] - Life.expectancy[Year=='2000'],
+  summarise(Life.expectancy.diff = Life.expectancy[Year=='2018'] - Life.expectancy[Year=='2000'],
             Country = Country,
             Life.expectancy.2000 = Life.expectancy[Year=='2000'],
-            Life.expectancy.2015 = Life.expectancy[Year=='2015'])
+            Life.expectancy.2018 = Life.expectancy[Year=='2018']) %>% 
+  arrange(Life.expectancy.diff) 
 
 # Pour la carte ggplot
-dta.diff1 <- dta %>% 
-  group_by(Country) %>%
-  summarise(Life.expectancy.diff = Life.expectancy[Year=='2015'] - Life.expectancy[Year=='2000']) %>%
-  arrange(Life.expectancy.diff)
+# dta.diff1 <- dta %>% 
+#   group_by(Country) %>%
+#   summarise(Life.expectancy.diff = Life.expectancy[Year=='2015'] - Life.expectancy[Year=='2000']) %>%
+#   arrange(Life.expectancy.diff)
 
 ```
 
@@ -97,118 +120,118 @@ dta.diff1 <- dta %>%
 Préparation des données qui concernent la latitude et la longitude.
 
 ```{r}
-world_map = map_data("world")[,-6]
-
-colnames(world_map)[5] = "Country"
-
-setdiff(dta$Country, world_map$Country)
-world_map[world_map$Country == "Antigua",]$Country = "Antigua and Barbuda"
-world_map[world_map$Country == "Barbuda",]$Country = "Antigua and Barbuda"
-world_map[world_map$Country == "Bolivia",]$Country = "Bolivia (Plurinational State of)"
-world_map[world_map$Country == "Brunei",]$Country = "Brunei Darussalam"
-world_map[world_map$Country == "Ivory Coast",]$Country = "Côte d'Ivoire"
-world_map[world_map$Country == "Cape Verde",]$Country = "Cabo Verde"
-world_map[world_map$Country == "Czech Republic",]$Country = "Czechia"
-world_map[world_map$Country == "Republic of Congo",]$Country = "Congo"
-world_map[world_map$Country == "North Korea",]$Country = "Democratic People's Republic of Korea"
-world_map[world_map$Country == "Iran",]$Country = "Iran (Islamic Republic of)"
-world_map[world_map$Country == "Laos",]$Country = "Lao People's Democratic Republic"
-world_map[world_map$Country == "Micronesia",]$Country = "Micronesia (Federated States of)"
-world_map[world_map$Country == "South Korea",]$Country = "Republic of Korea"
-world_map[world_map$Country == "Moldova",]$Country = "Republic of Moldova"
-world_map[world_map$Country == "Russia",]$Country = "Russian Federation"
-world_map[world_map$Country == "Syria",]$Country = "Syrian Arab Republic"
-world_map[world_map$Country == "Saint Kitts",]$Country = "Saint Kitts and Nevis"
-world_map[world_map$Country == "Nevis",]$Country = "Saint Kitts and Nevis"
-world_map[world_map$Country == "Saint Vincent",]$Country = "Saint Vincent and the Grenadines"
-world_map[world_map$Country == "Grenadines",]$Country = "Saint Vincent and the Grenadines"
-world_map[world_map$Country == "North Macedonia",]$Country = "The former Yugoslav republic of Macedonia"
-world_map[world_map$Country == "Trinidad",]$Country = "Trinidad and Tobago"
-world_map[world_map$Country == "Tobago",]$Country = "Trinidad and Tobago"
-world_map[world_map$Country == "UK",]$Country = "United Kingdom of Great Britain and Northern Ireland"
-world_map[world_map$Country == "Tanzania",]$Country = "United Republic of Tanzania"
-world_map[world_map$Country == "USA",]$Country = "United States of America"
-world_map[world_map$Country == "Venezuela",]$Country = "Venezuela (Bolivarian Republic of)"
-world_map[world_map$Country == "Vietnam",]$Country = "Viet Nam"
-setdiff(dta$Country, world_map$Country)
-
-life.exp.map <- left_join(dta.diff1, world_map, by = "Country")
-n_distinct(life.exp.map[,1])
+# world_map = map_data("world")[,-6]
+# 
+# colnames(world_map)[5] = "Country"
+# 
+# setdiff(dta$Country, world_map$Country)
+# world_map[world_map$Country == "Antigua",]$Country = "Antigua and Barbuda"
+# world_map[world_map$Country == "Barbuda",]$Country = "Antigua and Barbuda"
+# world_map[world_map$Country == "Bolivia",]$Country = "Bolivia (Plurinational State of)"
+# world_map[world_map$Country == "Brunei",]$Country = "Brunei Darussalam"
+# world_map[world_map$Country == "Ivory Coast",]$Country = "Côte d'Ivoire"
+# world_map[world_map$Country == "Cape Verde",]$Country = "Cabo Verde"
+# world_map[world_map$Country == "Czech Republic",]$Country = "Czechia"
+# world_map[world_map$Country == "Republic of Congo",]$Country = "Congo"
+# world_map[world_map$Country == "North Korea",]$Country = "Democratic People's Republic of Korea"
+# world_map[world_map$Country == "Iran",]$Country = "Iran (Islamic Republic of)"
+# world_map[world_map$Country == "Laos",]$Country = "Lao People's Democratic Republic"
+# world_map[world_map$Country == "Micronesia",]$Country = "Micronesia (Federated States of)"
+# world_map[world_map$Country == "South Korea",]$Country = "Republic of Korea"
+# world_map[world_map$Country == "Moldova",]$Country = "Republic of Moldova"
+# world_map[world_map$Country == "Russia",]$Country = "Russian Federation"
+# world_map[world_map$Country == "Syria",]$Country = "Syrian Arab Republic"
+# world_map[world_map$Country == "Saint Kitts",]$Country = "Saint Kitts and Nevis"
+# world_map[world_map$Country == "Nevis",]$Country = "Saint Kitts and Nevis"
+# world_map[world_map$Country == "Saint Vincent",]$Country = "Saint Vincent and the Grenadines"
+# world_map[world_map$Country == "Grenadines",]$Country = "Saint Vincent and the Grenadines"
+# world_map[world_map$Country == "North Macedonia",]$Country = "The former Yugoslav republic of Macedonia"
+# world_map[world_map$Country == "Trinidad",]$Country = "Trinidad and Tobago"
+# world_map[world_map$Country == "Tobago",]$Country = "Trinidad and Tobago"
+# world_map[world_map$Country == "UK",]$Country = "United Kingdom of Great Britain and Northern Ireland"
+# world_map[world_map$Country == "Tanzania",]$Country = "United Republic of Tanzania"
+# world_map[world_map$Country == "USA",]$Country = "United States of America"
+# world_map[world_map$Country == "Venezuela",]$Country = "Venezuela (Bolivarian Republic of)"
+# world_map[world_map$Country == "Vietnam",]$Country = "Viet Nam"
+# setdiff(dta$Country, world_map$Country)
+# 
+# life.exp.map <- left_join(dta.diff1, world_map, by = "Country")
+# n_distinct(life.exp.map[,1])
 ```
 
 Compute the centroid as the mean longitude and lattitude used as label coordinate.
 
 ```{r}
-position <- world_map %>%
-  group_by(Country) %>%
-  summarise(long = mean(long), lat = mean(lat)) 
-
-dta.2015 <- dta %>% 
-  filter(Year=="2015")
-
-position.map <- left_join(dta.2015, position, by = "Country")
+# position <- world_map %>%
+#   group_by(Country) %>%
+#   summarise(long = mean(long), lat = mean(lat)) 
+# 
+# dta.2015 <- dta %>% 
+#   filter(Year=="2015")
+# 
+# position.map <- left_join(dta.2015, position, by = "Country")
 ```
 
 Carte statique (ggplot).
 
 ```{r}
-ggplot(life.exp.map, aes(long, lat))+
-  
-  geom_polygon(aes(group = group, fill = Life.expectancy.diff), color = "black") +
-  
-  theme_classic() + # fond blanc
-  
-  xlab("") + # on enlève les labels de l'axe x 
-  
-  ylab("") + # on enlève les labels de l'axe y 
-  
-  labs(fill='Diff', # titre de la légende
-       title="Différence des espérance de vie (2015-2000)" # ajout du titre
-  ) +
-  
-  theme(axis.line = element_blank(), # enlever les axes 
-        
-        axis.ticks =  element_blank(), # enlever les traits des axes
-        
-        axis.text = element_blank(), # enlever les labels des axes
-        
-        plot.title = element_text(hjust = 0.5) # centrer le titre
-  ) + 
-  
-  scale_fill_viridis_c(option = "C") +
-  
-  geom_text(aes(label = Life.expectancy), data = position.map,  size = 3, hjust = 0.5, col="white")
+# ggplot(life.exp.map, aes(long, lat))+
+#   
+#   geom_polygon(aes(group = group, fill = Life.expectancy.diff), color = "black") +
+#   
+#   theme_classic() + # fond blanc
+#   
+#   xlab("") + # on enlève les labels de l'axe x 
+#   
+#   ylab("") + # on enlève les labels de l'axe y 
+#   
+#   labs(fill='Diff', # titre de la légende
+#        title="Différence des espérance de vie (2015-2000)" # ajout du titre
+#   ) +
+#   
+#   theme(axis.line = element_blank(), # enlever les axes 
+#         
+#         axis.ticks =  element_blank(), # enlever les traits des axes
+#         
+#         axis.text = element_blank(), # enlever les labels des axes
+#         
+#         plot.title = element_text(hjust = 0.5) # centrer le titre
+#   ) + 
+#   
+#   scale_fill_viridis_c(option = "C") +
+#   
+#   geom_text(aes(label = Life.expectancy), data = position.map,  size = 3, hjust = 0.5, col="white")
 ```
+
 
 ## Version plotly
 
-Carte interactive (plot_ly).
-
 ```{r}
-fig <- plot_ly(dta.diff.ISO3, 
+fig <- plot_ly(diff.ISO3, 
                
                type = 'choropleth', 
                
-               locations = dta.diff.ISO3$ISO3, 
+               locations = diff.ISO3$ISO3, 
                
-               z = dta.diff.ISO3$Life.expectancy.diff, 
+               z = diff.ISO3$Life.expectancy.diff, 
                
-               text = paste("Pays : ", dta.diff.ISO3$Country, '<br>', 
-                            "Esperance de vie en 2000 : ", dta.diff.ISO3$Life.expectancy.2000, '<br>', 
-                            "Esperance de vie en 2015 : ", dta.diff.ISO3$Life.expectancy.2015, '<br>', 
-                            "Difference : ", dta.diff.ISO3$Life.expectancy.diff), 
+               text = paste("Pays : ", diff.ISO3$Country, '<br>', 
+                            "Esperance de vie en 2000 : ", round(diff.ISO3$Life.expectancy.2000,1), '<br>', 
+                            "Esperance de vie en 2018 : ", round(diff.ISO3$Life.expectancy.2018,1), '<br>', 
+                            "Difference : ", round(diff.ISO3$Life.expectancy.diff,1)), 
                
                colorscale = "YlGnBu",
                
                hoverinfo = 'text')
 
 fig %>% 
-  colorbar(title =  "Différence de \n l'espérance de vie \n entre 2015 et 2000")%>% 
-  layout(title = "Différence de l'espérance de vie (2015-2000)",
+  colorbar(title =  "Différence de \n l'espérance de vie \n entre 2018 et 2000")%>% 
+  layout(title = "Différence de l'espérance de vie (2018-2000)",
          legend = list(zanchor = "middle"))
 ```
 
-# Visu 2
+
+# Visu 2 : 
 
 ```{r}
 expectancy <- inner_join(dta, dta.diff, by='ISO3')
@@ -216,44 +239,14 @@ expectancy <- inner_join(dta, dta.diff, by='ISO3')
 expectancy.2000 <- expectancy %>% 
   filter(Year==2000)
 
-expectancy.2000[,5]<-round(expectancy.2000[,5],1)
-expectancy.2000[,6]<-round(expectancy.2000[,6],1)
-expectancy.2000[,8]<-round(expectancy.2000[,8],1)
-expectancy.2000[,9]<-round(expectancy.2000[,9],1)
+expectancy.2000[,4:13]<-round(expectancy.2000[,4:13],1)
 
 summary(expectancy.2000)
+```
 
-g1 <- ggplotly(ggplot(data = expectancy.2000, 
-                      aes(x = Depense.diff, y = Life.expectancy.diff, 
-                          text = paste("Pays : ", Country, 
-                                       "<br>Espérance de vie en 2000 : ", Life.expectancy, 
-                                       "<br>Dépenses en santé en 2000 : ", Depense," USD")), 
-                      na.rm=TRUE) +
-                 
-                 geom_point(aes(color=Life.expectancy, size=Depense)) +
-                 
-                 scale_color_gradient(low ="#FFFF99",high = "#009933") +
-                 
-                 scale_y_continuous(breaks=seq(-10, 20, 5)) +
-                 
-                 scale_x_continuous(breaks=seq(0, 6000, 1000)) +
-                 
-                 labs(x = "Différences des dépenses en santé par habitant entre 2000 et 2015 (USD)",
-                      y = "Différences d'espérance de vie entre 2000 et 2015",
-                      colour = "Espérance de vie",
-                      size = "Dépenses en santé \n par habitant") +
-                 
-                 ggtitle("Représentation de la relation espérance de vie - dépense en santé") +
-                 
-                 theme(plot.title = element_text(face="bold", hjust=0.5, size=10), 
-                       axis.title.x = element_text(size=9),
-                       axis.title.y = element_text(size=9),
-                       panel.background = element_rect(fill = "white"),
-                       panel.grid.major = element_line(colour = "#CCCCCC"),
-                       plot.margin = unit(c(1,1,1,1), "cm")), tooltip="text")
+GDP par habitant par pays
 
-g1 %>% layout(showlegend=TRUE)
-
+```{r}
 g2 <- ggplotly(ggplot(data = expectancy.2000, 
                       aes(x = GDP.diff, y = Life.expectancy.diff, 
                           text=paste("Pays : ",Country,
@@ -267,12 +260,12 @@ g2 <- ggplotly(ggplot(data = expectancy.2000,
                  
                  scale_y_continuous(breaks=seq(-10, 20, 5)) +
                  
-                 scale_x_continuous(breaks=seq(-10000, 60000, 10000)) +
+                 scale_x_continuous(breaks=seq(-1000, 101000, 25000)) +
                  
-                 labs(x = "Différences de GDP par habitant entre 2000 et 2015",
-                      y = "Différences d'espérance de vie entre 2000 et 2015",
-                      colour = "Espérance de vie",
-                      size = "GDP par habitant") +
+                 labs(x = "Différences de GDP par habitant entre 2000 et 2018",
+                      y = "Différences d'espérance de vie entre 2000 et 2018",
+                      colour = "Espérance de vie \n en 2000",
+                      size = "GDP par habitant \n en 2000") +
                  
                  ggtitle("Représentation de la relation espérance de vie - GDP") +
                  
@@ -284,4 +277,218 @@ g2 <- ggplotly(ggplot(data = expectancy.2000,
                        plot.margin = unit(c(1,1,1,1), "cm")), tooltip="text")
 
 g2 %>% layout(showlegend=TRUE)
+```
+
+
+Depenses en santé par habitant par pays
+
+```{r}
+g1 <- ggplotly(ggplot(data = expectancy.2000, 
+                      aes(x = Depense.diff, y = Life.expectancy.diff, 
+                          text = paste("Pays : ", Country, 
+                                       "<br>Espérance de vie en 2000 : ", Life.expectancy, 
+                                       "<br>Dépenses en santé en % GDP en 2000 : ", Depense," %")), 
+                      na.rm=TRUE) +
+                 
+                 geom_point(aes(color=Life.expectancy, size=Depense)) +
+                 
+                 scale_color_gradient(low ="#FFFF99",high = "#009933") +
+                 
+                 scale_y_continuous(breaks=seq(-10, 20, 5)) +
+                 
+                 scale_x_continuous(limits=c(-5,7.5), breaks=seq(-5, 7.5, 2.5)) +
+                 
+                 labs(x = "Différences du pourcentage de dépenses en santé \n en pourcentage du GDP entre 2000 et 2018",
+                      y = "Différences d'espérance de vie entre 2000 et 2018",
+                      colour = "Espérance de vie \n en 2000",
+                      size = "Dépenses en santé \n par habitant en 2000") +
+                 
+                 ggtitle("Représentation de la relation espérance de vie - dépense en santé") +
+                 
+                 theme(plot.title = element_text(face="bold", hjust=0.5, size=10), 
+                       axis.title.x = element_text(size=9),
+                       axis.title.y = element_text(size=9),
+                       panel.background = element_rect(fill = "white"),
+                       panel.grid.major = element_line(colour = "#CCCCCC"),
+                       plot.margin = unit(c(1,1,1,1), "cm")), tooltip="text")
+
+g1 %>% layout(showlegend=TRUE)
+```
+
+
+
+% d'anémie chez les enfants de moins de 5 ans par pays
+
+```{r}
+g2 <- ggplotly(ggplot(data = expectancy.2000, 
+                      aes(x = Anemie.diff, y = Life.expectancy.diff, 
+                          text=paste("Pays : ",Country,
+                                     "<br>Espérance de vie en 2000 : ", Life.expectancy, 
+                                     "<br> Enfants de moins de 5 ans \n atteint d'anémie en 2000 : ", Anemie, "%")), 
+                      na.rm=TRUE) +
+                 
+                 geom_point(aes(color=Life.expectancy, size=Anemie)) +
+                 
+                 scale_color_gradient(low ="#FFFF99",high = "#009933") +
+                 
+                 scale_y_continuous(breaks=seq(-10, 20, 5)) +
+                 
+                 scale_x_continuous(limits=c(-30, 5), breaks=seq(-30,5,5))+
+                 
+                 labs(x = "Différences de pourcentage d'enfants de moins de 5 ans \n atteints d'anémie entre 2000 et 2018",
+                      y = "Différences d'espérance de vie entre 2000 et 2018",
+                      colour = "Espérance de vie \n en 2000",
+                      size = "% d'enfant atteints \n d'anémie en 2000") +
+                 
+                 ggtitle("Représentation de la relation espérance de vie - Anémie") +
+                 
+                 theme(plot.title = element_text(face="bold", hjust=0.5, size=10), 
+                       axis.title.x = element_text(size=9),
+                       axis.title.y = element_text(size=9),
+                       panel.background = element_rect(fill = "white"),
+                       panel.grid.major = element_line(colour = "#CCCCCC"),
+                       plot.margin = unit(c(1,1,1,1), "cm")), tooltip="text")
+
+g2 %>% layout(showlegend=TRUE)
+```
+
+
+```{r}
+g2 <- ggplotly(ggplot(data = expectancy.2000, 
+                      aes(x = Water.diff, y = Life.expectancy.diff, 
+                          text=paste("Pays : ",Country,
+                                     "<br>Espérance de vie en 2000 : ", Life.expectancy, 
+                                     "<br> Accès à l'eau potable en 2000 : ", Water, "%")), 
+                      na.rm=TRUE) +
+                 
+                 geom_point(aes(color=Life.expectancy, size=Water)) +
+                 
+                 scale_color_gradient(low ="#FFFF99",high = "#009933") +
+                 
+                 scale_y_continuous(breaks=seq(-10, 20, 5)) +
+                 
+                 scale_x_continuous(limits=c(-10,35), breaks=seq(-10, 30, 10)) +
+                 
+                 labs(x = "Différences du pourcentage de personnes \n ayant accès à l'eau potable entre 2000 et 2018",
+                      y = "Différences d'espérance de vie entre 2000 et 2018",
+                      colour = "Espérance de vie \n en 2000",
+                      size = "% de personnes \n ayant accès à l'eau potable en 2000") +
+                 
+                 ggtitle("Représentation de la relation espérance de vie - Eau potable") +
+                 
+                 theme(plot.title = element_text(face="bold", hjust=0.5, size=10), 
+                       axis.title.x = element_text(size=9),
+                       axis.title.y = element_text(size=9),
+                       panel.background = element_rect(fill = "white"),
+                       panel.grid.major = element_line(colour = "#CCCCCC"),
+                       plot.margin = unit(c(1,1,1,1), "cm")), tooltip="text")
+
+g2 %>% layout(showlegend=TRUE)
+```
+
+# Visu 3
+
+```{r}
+# Les 5 Pays avec l'évolution la plus petite
+unique(diff.ISO3$ISO3)[1:5]
+unique(dta_off$Country[dta_off$ISO3 == "SYR"])
+unique(dta_off$Country[dta_off$ISO3 == "GRD"])
+unique(dta_off$Country[dta_off$ISO3 == "VEN"])
+unique(dta_off$Country[dta_off$ISO3 == "SYC"])
+unique(dta_off$Country[dta_off$ISO3 == "JAM"])
+
+
+# Les 5 Pays avec l'évolution la plus grande
+unique(diff.ISO3$ISO3)[234:239]
+unique(dta_off$Country[dta_off$ISO3 == "PLW"])
+unique(dta_off$Country[dta_off$ISO3 == "SMR"])
+unique(dta_off$Country[dta_off$ISO3 == "SXM"])
+unique(dta_off$Country[dta_off$ISO3 == "TCA"])
+unique(dta_off$Country[dta_off$ISO3 == "VGB"])
+```
+
+Syrie.
+
+```{r}
+ggplot(data = dta_off[dta_off$ISO3 == "SYR",], 
+       aes(x = Year, y = Life.expectancy, group=1)) +
+  
+  geom_line(color = "#00AFBB", size = 2) +
+  
+  geom_point()
+```
+
+
+Grenada.
+
+```{r, warning=F}
+ggplot(data = dta_off[dta_off$ISO3 == "GRD",], 
+       aes(x = Year, y = Life.expectancy, group=1)) + 
+  
+  geom_line(color = "#00AFBB", size = 2) +
+  
+  geom_point() +
+  
+  # geom_ribbon(aes(ymin = 72, ymax=Life.expectancy), fill = "#00AFBB", alpha = .2) +
+  
+  # annotate(geom = "rect", 
+  #          xmin = 1, xmax = 4,
+  #          ymin = 72, ymax = 73.5,
+  #          alpha = .3, fill = "lightblue") +
+  
+  annotate(geom = "curve", 
+           x = 6.5, xend = 5,
+           y = 73.2, yend = dta_off$Life.expectancy[dta_off$Country=="Grenada"&dta_off$Year=="2004"] + 0.03, 
+           curvature = .2, 
+           arrow = arrow(length = unit(2, "mm"))) +
+  
+  annotate(geom = "text", 
+           x = 6.6, y = 73.2, 
+           label = "Hurricane Ivan", 
+           hjust = "left") +
+  
+  geom_segment(aes(x=5, xend=5, 
+                   y = min(dta_off$Life.expectancy[dta_off$Country=="Grenada"]), 
+                   yend = dta_off$Life.expectancy[dta_off$Country=="Grenada"&dta_off$Year=="2004"]),
+               linetype="dotted") + 
+  
+  theme_classic() +
+  
+  labs(title='Espérance de vie Grenada', # ajout du titre
+       subtitle='De 2000 à 2020', # ajout du sous titre
+       caption = "Source: ")  # ajout de la source
+```
+
+Venezuela.
+
+```{r}
+ggplot(data = dta_off[dta_off$ISO3 == "VEN",], 
+       aes(x = Year, y = Life.expectancy, group=1)) +
+  
+  geom_line(color = "#00AFBB", size = 2) +
+  
+  geom_point() 
+```
+
+Seychelles.
+
+```{r}
+ggplot(data = dta_off[dta_off$ISO3 == "SYC",], 
+       aes(x = Year, y = Life.expectancy, group=1)) +
+  
+  geom_line(color = "#00AFBB", size = 2) +
+  
+  geom_point() 
+```
+
+
+Jamaica.
+
+```{r}
+ggplot(data = dta_off[dta_off$ISO3 == "JAM",], 
+       aes(x = Year, y = Life.expectancy, group=1)) +
+  
+  geom_line(color = "#00AFBB", size = 2) +
+  
+  geom_point() 
 ```
