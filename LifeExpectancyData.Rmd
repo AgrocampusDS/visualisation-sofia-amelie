@@ -312,12 +312,60 @@ unique(dta_off$Country[dta_off$ISO3 == "VGB"])
 Syrie.
 
 ```{r}
-ggplot(data = dta_off[dta_off$ISO3 == "SYR",], 
-       aes(x = Year, y = Life.expectancy, group=1)) +
+dta_SYR <- subset(dta_off, ISO3 == "SYR")
+
+ggplot(data = dta_SYR) +
   
-  geom_line(color = "#00AFBB", size = 2) +
+  geom_line(aes(x = Year, y = Life.expectancy), 
+            color = "#00AFBB", size = 1, group=1) +
   
-  geom_point()
+  geom_point(aes(x = Year, y = Life.expectancy, group=1)) +
+  
+  scale_y_continuous(limits=c(68,75), breaks=seq(68, 75, 1)) +
+  
+  annotate(geom = "segment", 
+           x = 12, xend = 19,
+           y = 68.8, yend = 68.8, 
+           arrow = arrow(length = unit(2, "mm"))) +
+  
+  annotate(geom = "text", 
+           x = 13, y = 69, 
+           label = "Guerre civile depuis 2011", 
+           hjust = "left") +
+  
+  theme(plot.margin = unit(c(1,1,1,1), "cm")) +
+  
+  annotate(geom = "segment", 
+           x = 0, xend = 19,
+           y = 68, yend = 68, 
+           arrow = arrow(length = unit(2, "mm"))) +
+  
+   annotate(geom = "text", 
+           x = 9, y = 68.2, 
+           label = "Chef du gouvernement : Bashar el-Assad") +
+
+  annotate(geom = "rect",
+           xmin = 12, xmax = 19,
+           ymin = 68, ymax = 75,
+           alpha = .3, fill = "skyblue3") +
+  
+  annotate(geom = "curve", 
+           x = 6.9, xend = 6,
+           y = 74.8, yend = 74.5, 
+           curvature = .5, 
+           arrow = arrow(length = unit(2, "mm"))) +
+  
+  annotate(geom = "text", 
+           x = 7, y = 74.8, 
+           label = "Retrait des troupes syriennes du Liban", 
+           hjust = "left") +
+  
+  theme_classic() +
+  
+  labs(title="Evolution de l'espérance de vie en Syrie", 
+       subtitle='Entre 2000 et 2018',
+       x = 'Années',
+       y = 'Espérance de vie moyenne à la naissance \n (années)')
 ```
 
 
