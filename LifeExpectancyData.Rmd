@@ -497,4 +497,3 @@ plot_ly(dta_dual_y) %>%
   layout(yaxis2 = new.y, yaxis = old.y, xaxis = list(title="Year"))
 
 ```
-
