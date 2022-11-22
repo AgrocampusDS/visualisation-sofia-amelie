@@ -429,45 +429,128 @@ ggplot(data = dta_off[dta_off$ISO3 == "GRD",],
   
   geom_point() +
   
-  # geom_ribbon(aes(ymin = 72, ymax=Life.expectancy), fill = "#00AFBB", alpha = .2) +
-  
-  # annotate(geom = "rect", 
-  #          xmin = 1, xmax = 4,
-  #          ymin = 72, ymax = 73.5,
-  #          alpha = .3, fill = "lightblue") +
-  
+  # Ouragan Ivan 2004
   annotate(geom = "curve", 
-           x = 6.5, xend = 5,
-           y = 73.2, yend = dta_off$Life.expectancy[dta_off$Country=="Grenada"&dta_off$Year=="2004"] + 0.03, 
-           curvature = .2, 
+           x = 3.5, xend = 5,
+           y = 73.15, yend = dta_off$Life.expectancy[dta_off$Country=="Grenada"&dta_off$Year=="2004"] + 0.03, 
+           curvature = -0.2, 
            arrow = arrow(length = unit(2, "mm"))) +
   
   annotate(geom = "text", 
-           x = 6.6, y = 73.2, 
-           label = "Hurricane Ivan", 
-           hjust = "left") +
+           x = 3.4, y = 73.15, 
+           label = "Ouragan Ivan", 
+           hjust = "right") +
   
   geom_segment(aes(x=5, xend=5, 
                    y = min(dta_off$Life.expectancy[dta_off$Country=="Grenada"]), 
                    yend = dta_off$Life.expectancy[dta_off$Country=="Grenada"&dta_off$Year=="2004"]),
                linetype="dotted") + 
   
+  # Ouragan Emily 2005
+  annotate(geom = "curve", 
+           x = 7.5, xend = 6,
+           y = 73.2, yend = dta_off$Life.expectancy[dta_off$Country=="Grenada"&dta_off$Year=="2005"] + 0.03, 
+           curvature = .2, 
+           arrow = arrow(length = unit(2, "mm"))) +
+  
+  annotate(geom = "text", 
+           x = 7.6, y = 73.2, 
+           label = "Ouragan Emily", 
+           hjust = "left") +
+  
+  geom_segment(aes(x=6, xend=6, 
+                   y = min(dta_off$Life.expectancy[dta_off$Country=="Grenada"]), 
+                   yend = dta_off$Life.expectancy[dta_off$Country=="Grenada"&dta_off$Year=="2005"]),
+               linetype="dotted") +
+  
   theme_classic() +
   
   labs(title='Espérance de vie Grenada', # ajout du titre
-       subtitle='De 2000 à 2020', # ajout du sous titre
-       caption = "Source: ")  # ajout de la source
+       subtitle='De 2000 à 2018')  # ajout du sous titre
 ```
 
 Venezuela.
 
 ```{r}
+# Esperance de vie
 ggplot(data = dta_off[dta_off$ISO3 == "VEN",], 
        aes(x = Year, y = Life.expectancy, group=1)) +
   
   geom_line(color = "#00AFBB", size = 2) +
   
-  geom_point() 
+  geom_point() +
+  
+  # geom_ribbon(aes(ymin = 72, ymax=Life.expectancy), fill = "#00AFBB", alpha = .2) +
+  
+  annotate(geom = "rect",
+           xmin = 1, xmax = 14,
+           ymin = 72, ymax = 73.5,
+           alpha = .3, fill = "lightblue") +
+  
+  annotate(geom = "text", 
+           x = 1.8, y = 72.1, 
+           label = "Présidence d'Hugo Chávez", 
+           hjust = "left") +
+  
+  annotate(geom = "rect",
+           xmin = 14, xmax = 19,
+           ymin = 72, ymax = 73.5,
+           alpha = .3, fill = "skyblue3") +
+  
+  annotate(geom = "text", 
+           x = 12.8, y = 72.1, 
+           label = "Présidence de Nicolás Maduro", 
+           hjust = "left") +
+  
+  theme_classic()
+
+
+# GDP
+GDP_VEN <- read.csv("GDP_VEN.csv", sep=";")
+colnames(GDP_VEN) <- c("2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018")
+
+GDP_VEN <- GDP_VEN %>% 
+  pivot_longer(c("2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018"))
+colnames(GDP_VEN)[1:2] <- c("Year", "GDP")
+GDP_VEN$Year <- as.factor(GDP_VEN$Year)
+
+GDP_VEN$GDP_obs <- c(GDP_VEN$GDP[1:15], rep(NA,4))
+GDP_VEN$GDP_pred <- c(rep(NA,14),GDP_VEN$GDP[15:19])
+
+lines <- c("Observed" = "solid", "Predicted" = "dashed")
+
+ggplot(data = GDP_VEN,
+       aes(x = Year, group=1)) +
+  
+  geom_line(aes(y = GDP_obs, linetype = "Observed"), color = "#00AFBB", size = 1.5) +
+  
+  geom_line(aes(y = GDP_pred, linetype = "Predicted"), color = "#00AFBB", size = 1.5) +
+  
+  geom_point(aes(x=Year, y=GDP)) +
+  
+  # geom_ribbon(aes(ymin = 72, ymax=Life.expectancy), fill = "#00AFBB", alpha = .2) +
+  
+  annotate(geom = "rect",
+           xmin = 1, xmax = 14,
+           ymin = 0, ymax = 5e+11,
+           alpha = .3, fill = "lightblue") +
+
+  annotate(geom = "text",
+           x = 1.8, y = min(GDP_VEN$GDP)-5e+10,
+           label = "Présidence d'Hugo Chávez",
+           hjust = "left") +
+
+  annotate(geom = "rect",
+           xmin = 14, xmax = 19,
+           ymin = 0, ymax = 5e+11,
+           alpha = .3, fill = "skyblue3") +
+
+  annotate(geom = "text",
+           x = 14.3, y = min(GDP_VEN$GDP)-5e+10,
+           label = "Présidence de \nNicolás Maduro",
+           hjust = "left") +
+  
+  theme_classic()
 ```
 
 Seychelles.
