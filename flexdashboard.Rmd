@@ -1,6 +1,6 @@
 ---
 title: "Un joli titre pour le dashboard"
-author: "Marie-Pierre Etienne"
+author: "Sofia Chemolli & Amélie Rivet"
 output: 
   flexdashboard::flex_dashboard:
     theme: bootstrap
@@ -28,39 +28,122 @@ color:black!important;
 
 
 ```{r setup, include=FALSE}
-library(flexdashboard)
-library(tidyverse)
 library(ggplot2)
+library(tidyverse)
+library(dplyr)
 library(plotly)
+library(flexdashboard)
 ```
 
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-### An easy solution for dashboard
-
-```{r, echo = TRUE}
-#install.package('flexdasboard')
-#rmarkdown::draft("dashboard.Rmd", template = "flex_dashboard", package = "flexdashboard")
-```
-
-The [flexdashboard website](https://rmarkdown.rstudio.com/flexdashboard/index.html) provides multiple advanced examples.
-
 ### Some static graph
 
 ```{r data, eval = TRUE, echo = FALSE, results='hide', message = FALSE, warning=FALSE}
-n <- 100
-dta <- tibble(size = round(rnorm(n, mean = 0, sd =10),2), 
-           color = sample(x= c('Blue', 'Yellow'), size = n, replace = TRUE))
+# Espérance de vie a la naissance
+dta_off <- read.csv("Dta_off.csv", sep=",", stringsAsFactors = T)
+dta_off <- dta_off[,3:23]
+colnames(dta_off) <- c("Country","ISO3","2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018")
 
+dta_off <- dta_off %>% 
+  pivot_longer(c("2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018"))
+colnames(dta_off)[3:4] <- c("Year", "Life.expectancy")
+dta_off$Year <- as.factor(dta_off$Year)
+
+dta_off <- dta_off[-c(4558:nrow(dta_off)),]
+
+
+# GDP par habitant
+dta_GDP <- read.csv("GDPDataBank.csv", sep=",", stringsAsFactors = T)
+dta_GDP <- dta_GDP[,4:23]
+colnames(dta_GDP) <- c("ISO3","2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018")
+
+dta_GDP <- dta_GDP %>% 
+  pivot_longer(c("2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018"))
+colnames(dta_GDP)[2:3] <- c("Year", "GDP")
+dta_GDP$Year <- as.factor(dta_GDP$Year)
+
+
+# Dépenses sante % GDP
+dta_dep <- read.csv("HealthExpDataBank.csv", sep=",", stringsAsFactors = T)
+dta_dep <- dta_dep[,4:23]
+colnames(dta_dep) <- c("ISO3","2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018")
+
+dta_dep <- dta_dep %>% 
+  pivot_longer(c("2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018"))
+colnames(dta_dep)[2:3] <- c("Year", "Depense")
+dta_dep$Year <- as.factor(dta_dep$Year)
+
+
+# Anemie chez les enfants
+dta_anemia <- read.csv("WHO_anemia.csv", sep=';', dec=',', stringsAsFactors = T)
+dta_anemia$Year <- as.factor(dta_anemia$Year)
+
+
+# Acces a l'eau potable
+dta_water <- read.csv("WaterDataBank.csv", sep=",", stringsAsFactors = T)
+dta_water <- dta_water[,4:23]
+colnames(dta_water) <- c("ISO3","2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015", "2016","2017","2018")
+
+dta_water <- dta_water %>% 
+  pivot_longer(c("2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015", "2016","2017","2018"))
+colnames(dta_water)[2:3] <- c("Year", "Water")
+dta_water$Year <- as.factor(dta_water$Year)
+
+dta <- left_join(dta_off, dta_dep, by = c("ISO3","Year"))
+
+dta <- left_join(dta, dta_GDP, by = c("ISO3","Year"))
+
+dta <- left_join(dta, dta_anemia[,-2], by = c("ISO3","Year"))
+
+dta <- left_join(dta, dta_water, by = c("ISO3","Year"))
+
+# Amélie
+dta.diff <- dta %>% 
+  group_by(ISO3) %>%
+  summarise(Life.expectancy.diff = Life.expectancy[Year=='2018'] - Life.expectancy[Year=='2000'], 
+            Depense.diff = Depense[Year=='2018'] - Depense[Year=='2000'], 
+            GDP.diff = GDP[Year=='2018'] - GDP[Year=='2000'],
+            Anemie.diff = Anemie[Year=='2018'] - Anemie[Year=='2000'], 
+            Water.diff = Water[Year=='2018'] - Water[Year=='2000']) %>%
+  arrange(Life.expectancy.diff)
+
+# Sofia
+diff.ISO3 <- dta_off %>% 
+  filter(Year==2000 | Year==2018) %>% 
+  group_by(ISO3) %>%
+  summarise(Life.expectancy.diff = Life.expectancy[Year=='2018'] - Life.expectancy[Year=='2000'],
+            Country = Country,
+            Life.expectancy.2000 = Life.expectancy[Year=='2000'],
+            Life.expectancy.2018 = Life.expectancy[Year=='2018']) %>% 
+  arrange(Life.expectancy.diff) 
 ```
 
 
-```{r graph_static,  echo = FALSE,  message = FALSE, warning=FALSE}
-p1 <- dta %>% ggplot() +
-  aes(x=color, y = size) +
-  geom_boxplot(aes(fill= color))
-p1
+
+```{r vis1,  echo = FALSE,  message = FALSE, warning=FALSE}
+fig <- plot_ly(diff.ISO3, 
+               
+               type = 'choropleth', 
+               
+               locations = diff.ISO3$ISO3, 
+               
+               z = diff.ISO3$Life.expectancy.diff, 
+               
+               text = paste("Pays : ", diff.ISO3$Country, '<br>', 
+                            "Esperance de vie en 2000 : ", round(diff.ISO3$Life.expectancy.2000,1), '<br>', 
+                            "Esperance de vie en 2018 : ", round(diff.ISO3$Life.expectancy.2018,1), '<br>', 
+                            "Difference : ", round(diff.ISO3$Life.expectancy.diff,1)), 
+               
+               colorscale = "YlGnBu",
+               
+               hoverinfo = 'text')
+
+fig %>% 
+  colorbar(title =  "Différence de \n l'espérance de vie \n entre 2018 et 2000")%>% 
+  layout(title = "Différence de l'espérance de vie (2018-2000)",
+         legend = list(zanchor = "middle"))
 ```
 
 Column {.tabset .tabset-fade}
@@ -69,8 +152,8 @@ Column {.tabset .tabset-fade}
 
 ### Some dynamic maps
 
-```{r  ggplotly, echo = TRUE,  eval = TRUE,  message = FALSE, warning=FALSE}
-plotly::ggplotly(p1)
+```{r vis2, echo = TRUE,  eval = TRUE,  message = FALSE, warning=FALSE}
+# plotly::ggplotly(p1)
 ```
 
 
