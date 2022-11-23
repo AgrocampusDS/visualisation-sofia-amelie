@@ -8,7 +8,7 @@ output: html_document
 
 Importation des packages.
 
-```{r}
+```{r warning=FALSE}
 library(ggplot2)
 library(tidyverse)
 library(dplyr)
@@ -125,11 +125,12 @@ fig <- plot_ly(diff.ISO3,
                colorscale = "YlGnBu",
                
                hoverinfo = 'text')
+m <- list(l = 50, r = 50, b = 100, t = 100, pad = 4)
 
 fig %>% 
-  colorbar(title =  "Différence de \n l'espérance de vie \n entre 2018 et 2000")%>% 
-  layout(title = "Différence de l'espérance de vie (2018-2000)",
-         legend = list(zanchor = "middle"))
+  colorbar(title =list(text=paste0("Différence de \nl'espérance de vie \nà la naissance \nentre 2018 et 2000 \n(en années)"), font=list(size=12)), x = 1, y = 0.87, len = 0.7) %>% 
+  layout(title = list(text = paste0("Différence de l'espérance de vie moyenne par pays" , '<br>', '<sup>',  "entre 2018 et 2000"), font=list(size=16), xanchor = "middle", y=0.9, autosize = F, width = 500, height = 500, margin = m))
+
 ```
 
 
@@ -169,7 +170,7 @@ g2 <- ggplotly(ggplot(data = expectancy.2000,
                       colour = "Espérance de vie \n en 2000",
                       size = "GDP par habitant \n en 2000") +
                  
-                 ggtitle("Représentation de la relation espérance de vie - GDP") +
+                 ggtitle("Représentation de l'espérance de vie en fonction du GDP par habitant") +
                  
                  theme(plot.title = element_text(face="bold", hjust=0.5, size=10), 
                        axis.title.x = element_text(size=9),
