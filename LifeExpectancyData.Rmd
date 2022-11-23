@@ -313,6 +313,7 @@ Syrie.
 
 ```{r}
 dta_SYR <- subset(dta_off, ISO3 == "SYR")
+
 ggplot(data = dta_SYR) +
   
   geom_line(aes(x = Year, y = Life.expectancy), 
@@ -342,6 +343,7 @@ ggplot(data = dta_SYR) +
    annotate(geom = "text", 
            x = 9, y = 68.2, 
            label = "Chef du gouvernement : Bashar el-Assad") +
+
   annotate(geom = "rect",
            xmin = 12, xmax = 19,
            ymin = 68, ymax = 75,
