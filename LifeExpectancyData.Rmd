@@ -288,7 +288,6 @@ g2 <- ggplotly(ggplot(data = expectancy.2000,
 g2 %>% layout(showlegend=TRUE)
 ```
 
-
 # Visu 3
 
 ```{r}
