@@ -312,14 +312,59 @@ unique(dta_off$Country[dta_off$ISO3 == "VGB"])
 Syrie.
 
 ```{r}
-ggplot(data = dta_off[dta_off$ISO3 == "SYR",], 
-       aes(x = Year, y = Life.expectancy, group=1)) +
+dta_SYR <- subset(dta_off, ISO3 == "SYR")
+ggplot(data = dta_SYR) +
   
-  geom_line(color = "#00AFBB", size = 2) +
+  geom_line(aes(x = Year, y = Life.expectancy), 
+            color = "#00AFBB", size = 1, group=1) +
   
-  geom_point()
+  geom_point(aes(x = Year, y = Life.expectancy, group=1)) +
+  
+  scale_y_continuous(limits=c(68,75), breaks=seq(68, 75, 1)) +
+  
+  annotate(geom = "segment", 
+           x = 12, xend = 19,
+           y = 68.8, yend = 68.8, 
+           arrow = arrow(length = unit(2, "mm"))) +
+  
+  annotate(geom = "text", 
+           x = 13, y = 69, 
+           label = "Guerre civile depuis 2011", 
+           hjust = "left") +
+  
+  theme(plot.margin = unit(c(1,1,1,1), "cm")) +
+  
+  annotate(geom = "segment", 
+           x = 0, xend = 19,
+           y = 68, yend = 68, 
+           arrow = arrow(length = unit(2, "mm"))) +
+  
+   annotate(geom = "text", 
+           x = 9, y = 68.2, 
+           label = "Chef du gouvernement : Bashar el-Assad") +
+  annotate(geom = "rect",
+           xmin = 12, xmax = 19,
+           ymin = 68, ymax = 75,
+           alpha = .3, fill = "skyblue3") +
+  
+  annotate(geom = "curve", 
+           x = 6.9, xend = 6,
+           y = 74.8, yend = 74.5, 
+           curvature = .5, 
+           arrow = arrow(length = unit(2, "mm"))) +
+  
+  annotate(geom = "text", 
+           x = 7, y = 74.8, 
+           label = "Retrait des troupes syriennes du Liban", 
+           hjust = "left") +
+  
+  theme_classic() +
+  
+  labs(title="Evolution de l'espérance de vie en Syrie", 
+       subtitle='Entre 2000 et 2018',
+       x = 'Années',
+       y = 'Espérance de vie moyenne à la naissance \n (en années)')
 ```
-
 
 Grenada.
 
@@ -336,17 +381,19 @@ ggplot(data = dta_off[dta_off$ISO3 == "GRD",],
            x = 3.5, xend = 5,
            y = 73.15, yend = dta_off$Life.expectancy[dta_off$Country=="Grenada"&dta_off$Year=="2004"] + 0.03, 
            curvature = -0.2, 
-           arrow = arrow(length = unit(2, "mm"))) +
+           arrow = arrow(length = unit(2, "mm")),
+            col ="#00AFBB") +
   
   annotate(geom = "text", 
            x = 3.4, y = 73.15, 
            label = "Ouragan Ivan", 
-           hjust = "right") +
+           hjust = "right",
+           col = "#00AFBB") +
   
   geom_segment(aes(x=5, xend=5, 
                    y = min(dta_off$Life.expectancy[dta_off$Country=="Grenada"]), 
                    yend = dta_off$Life.expectancy[dta_off$Country=="Grenada"&dta_off$Year=="2004"]),
-               linetype="dotted") + 
+               linetype="longdash", col ="#00AFBB") + 
   
   # Ouragan Emily 2005
   annotate(geom = "curve", 
@@ -363,12 +410,12 @@ ggplot(data = dta_off[dta_off$ISO3 == "GRD",],
   geom_segment(aes(x=6, xend=6, 
                    y = min(dta_off$Life.expectancy[dta_off$Country=="Grenada"]), 
                    yend = dta_off$Life.expectancy[dta_off$Country=="Grenada"&dta_off$Year=="2005"]),
-               linetype="dotted") +
+               linetype="longdash") +
   
   theme_classic() +
   
-  labs(title='Espérance de vie Grenada', # ajout du titre
-       subtitle='De 2000 à 2018')  # ajout du sous titre
+  labs(title="Evolution de l'espérance de vie de Grenada", # ajout du titre
+       subtitle='Entre 2000 et 2018')  # ajout du sous titre
 ```
 
 Venezuela.
@@ -388,112 +435,59 @@ GDP_VEN$GDP_pred <- c(rep(NA,14),GDP_VEN$GDP[15:19])
 dta_dual_y <- data.frame(dta_off[dta_off$ISO3 == "VEN",])
 dta_dual_y$GDP_obs <- c(GDP_VEN$GDP[1:15], rep(NA,4))
 dta_dual_y$GDP_pred <- c(rep(NA,14),GDP_VEN$GDP[15:19])
-```
-
-```{r}
-# library(patchwork) # to put plots side to side
-# 
-# # Espérance de vie
-# g1 <- ggplot(data = dta_off[dta_off$ISO3 == "VEN",], 
-#        aes(x = Year, y = Life.expectancy, group=1)) +
-#   
-#   geom_line(color = "#00AFBB", size = 2) +
-#   
-#   geom_point() +
-#   
-#   # geom_ribbon(aes(ymin = 72, ymax=Life.expectancy), fill = "#00AFBB", alpha = .2) +
-#   
-#   annotate(geom = "rect",
-#            xmin = 1, xmax = 14,
-#            ymin = 72, ymax = 73.5,
-#            alpha = .3, fill = "lightblue") +
-#   
-#   annotate(geom = "text", 
-#            x = 1.8, y = 72.1, 
-#            label = "Présidence d'Hugo Chávez", 
-#            hjust = "left") +
-#   
-#   annotate(geom = "rect",
-#            xmin = 14, xmax = 19,
-#            ymin = 72, ymax = 73.5,
-#            alpha = .3, fill = "skyblue3") +
-#   
-#   annotate(geom = "text", 
-#            x = 12.8, y = 72.1, 
-#            label = "Présidence de Nicolás Maduro", 
-#            hjust = "left") +
-#   
-#   theme_classic()
-
-
-
-
-# lines <- c("Observed" = "solid", "Predicted" = "dashed")
-# 
-# g2 <- ggplot(data = GDP_VEN,
-#        aes(x = Year, group=1)) +
-#   
-#   geom_line(aes(y = GDP_obs, linetype = "Observed"), color = "#00AFBB", size = 1.5) +
-#   
-#   geom_line(aes(y = GDP_pred, linetype = "Predicted"), color = "#00AFBB", size = 1.5) +
-#   
-#   geom_point(aes(x=Year, y=GDP)) +
-#   
-#   # geom_ribbon(aes(ymin = 72, ymax=Life.expectancy), fill = "#00AFBB", alpha = .2) +
-#   
-#   annotate(geom = "rect",
-#            xmin = 1, xmax = 14,
-#            ymin = 0, ymax = 5e+11,
-#            alpha = .3, fill = "lightblue") +
-# 
-#   annotate(geom = "text",
-#            x = 1.8, y = min(GDP_VEN$GDP)-5e+10,
-#            label = "Présidence d'Hugo Chávez",
-#            hjust = "left") +
-# 
-#   annotate(geom = "rect",
-#            xmin = 14, xmax = 19,
-#            ymin = 0, ymax = 5e+11,
-#            alpha = .3, fill = "skyblue3") +
-# 
-#   annotate(geom = "text",
-#            x = 14.3, y = min(GDP_VEN$GDP)-5e+10,
-#            label = "Présidence de \nNicolás Maduro",
-#            hjust = "left") +
-#   
-#   theme_classic()
-# 
-# g1 + g2
-```
-
-
-```{r}
-dta_dual_y <- data.frame(dta_off[dta_off$ISO3 == "VEN",])
-dta_dual_y$GDP_obs <- c(GDP_VEN$GDP[1:15], rep(NA,4))
-dta_dual_y$GDP_pred <- c(rep(NA,14),GDP_VEN$GDP[15:19])
 
 old.y <- list(
-  side = "left",
-  title = "Life expectancy"
+  side = "left"
 )
 
 new.y <- list(
   overlaying = "y",
   side = "right",
-  title = "GDP"
+  title = "GDP par habitant (USD)"
 )
 
 plot_ly(dta_dual_y) %>%
   
-  add_lines(x = ~Year, y = ~Life.expectancy, yaxis="y1", name="Life expectancy", 
+  add_lines(x = ~Year, y = ~Life.expectancy, yaxis="y1", name="Esperance de vie", 
             line = list(color = 'black', width = 2)) %>%
   
-  add_lines(x = ~Year, y = ~GDP_obs, yaxis = "y2", name="Observed GDP",
+  add_lines(x = ~Year, y = ~GDP_obs, yaxis = "y2", name="GDP (données officielles)",
             line = list(color = '#00AFBB', width = 2)) %>%
   
-  add_lines(x = ~Year, y = ~GDP_pred, yaxis = "y2", name="Predicted GDP",
+  add_lines(x = ~Year, y = ~GDP_pred, yaxis = "y2", name="GDP (données estimées)",
             line = list(color = '#00AFBB', width = 2, dash = 'dot')) %>%
   
-  layout(yaxis2 = new.y, yaxis = old.y, xaxis = list(title="Year"))
+  layout(yaxis2 = new.y,
+         
+         yaxis = list(old.y, showgrid = F, title="Espérance de vie moyenne à la naissance \n (en années)"), 
+         
+         xaxis = list(title="Années", showgrid = F),
+         
+         legend = list(title=list(text=''), y = 73,
+                       textfont = list(family = "Arial", size = 14, color = toRGB("black"))),
+         
+         title = list(text = paste0("Evolution de l'espérance de vie du Venezuela", '<br>',
+                                    '<sup>', "Entre 2000 et 2018"),
+                      xanchor = 'left', x=0.1),
+         
+         shapes = list(
+               list(type = "rect",
+                    fillcolor = "lightblue", line = list(color = "lightblue"), opacity = 0.2,
+                    x0 = "0", x1 = "13",
+                    y0 = 72, y1 = 73.5),
+               list(type = "rect",
+                    fillcolor = "#009EFF", line = list(color = "#009EFF"), opacity = 0.2,
+                    x0 = "13", x1 = "18",
+                    y0 = 72, y1 = 73.5))) %>%
+           
+  add_text(showlegend = FALSE, 
+           x = c("2004","2016"), y = c(73.4, 73.4),
+           text = c("Présidence d'Hugo Chávez","Présidence de \nNicolás Maduro"),
+           textfont = list(family = "Arial", size = 14, color = toRGB("black")))
 
+```
+
+```{r}
+# library(patchwork) # to put plots side to side
+# g1 + g2
 ```
