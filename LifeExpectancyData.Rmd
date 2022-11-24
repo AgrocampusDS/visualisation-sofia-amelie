@@ -128,7 +128,7 @@ fig <- plot_ly(diff.ISO3,
 m <- list(l = 50, r = 50, b = 100, t = 100, pad = 4)
 
 fig %>% 
-  colorbar(title =list(text=paste0("Différence de \nl'espérance de vie \nà la naissance \nentre 2018 et 2000 \n(en années)"), font=list(size=12)), x = 1, y = 0.87, len = 0.7) %>% 
+  colorbar(title =list(text=paste0("Différence de \nl'espérance de vie \nà la naissance \nentre 2018 et 2000 \n(en années)"), font=list(size=12)), x = 1, y = 0.87, len = 0.6) %>% 
   layout(title = list(text = paste0("Différence de l'espérance de vie moyenne par pays" , '<br>', '<sup>',  "entre 2018 et 2000"), font=list(size=16), xanchor = "middle", y=0.9, autosize = F, width = 500, height = 500, margin = m))
 
 ```
@@ -179,7 +179,6 @@ g2 <- ggplotly(ggplot(data = expectancy.2000,
                        panel.grid.major = element_line(colour = "#CCCCCC"),
                        plot.margin = unit(c(1,1,1,1), "cm")), tooltip="text")
 
-g2 %>% layout(showlegend=TRUE)
 ```
 
 
@@ -287,12 +286,7 @@ g2 <- ggplotly(ggplot(data = expectancy.2000,
                        plot.margin = unit(c(1,1,1,1), "cm")), tooltip="text")
 
 g2 %>% layout(showlegend=TRUE)
-```
-
-```{r}
-# subplot(g1, g2, g3, g4, nrows = 2, titleX=T)
-```
-
+``` 
 
 # Visu 3
 
@@ -316,6 +310,59 @@ unique(dta_off$Country[dta_off$ISO3 == "VGB"])
 ```
 
 Syrie.
+
+```{r}
+dta_SYR <- subset(dta, ISO3 == "SYR")
+old.y <- list(
+  side = "left",
+  range=c(69,75)
+)
+new.y <- list(
+  overlaying = "y",
+  side = "right",
+  title ="Dépenses en santé (en % du GDP)",
+  range=c(3,5.5),
+  showgrid=F
+)
+fig1 <- plot_ly(dta_SYR) %>%
+  
+  add_lines(x = ~Year, y = ~Life.expectancy, yaxis="y1", name="Espérance de vie", 
+            line = list(color = 'black', width = 2)) %>%
+  
+  add_lines(x = ~Year, y = ~Depense, yaxis = "y2", name="Dépenses en santé",
+            line = list(color = '#00AFBB', width = 2)) %>%
+  
+  layout(yaxis2 = new.y,
+         
+         yaxis = list(old.y, showgrid = T, title="Espérance de vie moyenne à la naissance \n (en années)"), 
+         
+         xaxis = list(title="Années", showgrid = F),
+         
+         legend = list(title=list(text=''), y = 73,
+                       textfont = list(family = "Arial", size = 14, color = toRGB("black"))),
+         
+         title = list(text = paste0("Evolution de l'espérance de vie de la Syrie", '<br>',
+                                    '<sup>', "Entre 2000 et 2018"),
+                      xanchor = 'left', x=0.1),
+         
+         shapes = list(
+               list(type = "rect",
+                    fillcolor = "lightblue", line = list(color = "lightblue"), opacity = 0.3,
+                    x0 = "11", x1 = "18",
+                    y0 = 68.5, y1 = 75))) %>%
+  
+  add_annotations(x = 14.5, y = 74.5, 
+    text  = "Guerre civile depuis 2011", 
+    xanchor = 'center',
+    showarrow = F) %>%
+  add_annotations(x = 11, y = 69, 
+    text  = "Chute du GDP entre 2010 et 2012 : \n5,5 fois plus faible", 
+    xanchor = 'center',
+    showarrow = F)
+fig1
+
+```
+
 
 ```{r}
 dta_SYR <- subset(dta_off, ISO3 == "SYR")
@@ -368,11 +415,32 @@ ggplot(data = dta_SYR) +
   
   theme_classic() +
   
-  labs(title="Evolution de l'espérance de vie en Syrie", 
+  labs(title="Evolution de l'espérance de vie de la Syrie", 
        subtitle='Entre 2000 et 2018',
        x = 'Années',
        y = 'Espérance de vie moyenne à la naissance \n (en années)')
 ```
+
+
+```{r}
+dta_SYR <- subset(dta, ISO3 == "SYR")
+ggplot(data = dta_SYR) +
+  
+  geom_line(aes(x = Year, y = GDP), 
+            color = "grey", size = 1, group=1) +
+  
+  geom_point(aes(x = Year, y = GDP, group=1)) +
+  
+  theme_classic() +
+  
+  theme(plot.margin = unit(c(1,1,1,1), "cm")) +
+  
+  labs(title='Evolution de la part des dépenses en santé (% du GDP) en Syrie', # ajout du titre
+       subtitle='De 2000 à 2018',
+       x = 'Années',
+       y = 'Part des dépenses en santé (% du GDP)')
+```
+
 
 Grenada.
 
@@ -423,7 +491,9 @@ ggplot(data = dta_off[dta_off$ISO3 == "GRD",],
   theme_classic() +
   
   labs(title="Evolution de l'espérance de vie de Grenada", # ajout du titre
-       subtitle='Entre 2000 et 2018')  # ajout du sous titre
+       subtitle='Entre 2000 et 2018',
+       x = 'Années',
+       y = 'Espérance de vie moyenne à la naissance \n (en années)')  # ajout du sous titre
 ```
 
 Venezuela.
@@ -454,7 +524,7 @@ new.y <- list(
   title = "GDP par habitant (USD)"
 )
 
-plot_ly(dta_dual_y) %>%
+fig2 <- plot_ly(dta_dual_y) %>%
   
   add_lines(x = ~Year, y = ~Life.expectancy, yaxis="y1", name="Esperance de vie", 
             line = list(color = 'black', width = 2)) %>%
@@ -492,10 +562,9 @@ plot_ly(dta_dual_y) %>%
            x = c("2004","2016"), y = c(73.4, 73.4),
            text = c("Présidence d'Hugo Chávez","Présidence de \nNicolás Maduro"),
            textfont = list(family = "Arial", size = 14, color = toRGB("black")))
-
+fig2
 ```
 
-```{r}
-# library(patchwork) # to put plots side to side
-# g1 + g2
-```
+
+
+
