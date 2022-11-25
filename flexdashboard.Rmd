@@ -1,5 +1,5 @@
 ---
-title: "Espérance de vie"
+title: "Quels sont les facteurs qui peuvent influencer l'évolution de l'espérance de vie?"
 author: "Amélie Rivet & Sofia Chemolli"
 output: 
   flexdashboard::flex_dashboard:
@@ -140,11 +140,15 @@ fig %>%
   
   layout(title = list(text = paste0("Différence de l'espérance de vie par pays" , '<br>', '<sup>',  "entre 2018 et 2000"), 
                       font=list(size=22), xanchor = "middle", y=3), 
-                       margin = m)
+         margin = m,
+         annotations = list(x = 1, y = -0.1, text = "Source: https://data.worldbank.org/",
+                            xref='paper', yref='paper', showarrow = F, 
+                            xanchor='right', yanchor='auto', xshift=0, yshift=0,
+                            font = list(size = 10)))
 ```
 
 
-Visu 2
+Relations avec des indicateurs
 =======================================================================
 
 Row
@@ -158,8 +162,6 @@ expectancy.2000 <- expectancy %>%
   filter(Year==2000)
 
 expectancy.2000[,4:13]<-round(expectancy.2000[,4:13],1)
-
-summary(expectancy.2000)
 ```
 
 ### GDP par habitant (USD)
@@ -180,7 +182,17 @@ g1 <- ggplot(data = expectancy.2000,
   
   scale_x_continuous(breaks=seq(-1000, 101000, 25000)) +
   
-  labs(x = "Différence de GDP par habitant \nentre 2018 et 2000",
+  geom_vline(xintercept = 0, color="black", size=1) +
+  
+  geom_hline(yintercept = 0, color="black", size=1) +
+  
+  # annotate(geom = "text", 
+  #          x = 3000, y = 20, 
+  #          label = "x = 0",
+  #          color="black",
+  #          hjust = "left") +
+  
+  labs(x = "Différence de GDP par habitant en USD \nentre 2018 et 2000",
        y = "Différence d'espérance de vie \nentre 2018 et 2000",
        colour = "Espérance de vie \nen 2000",
        size = "GDP par habitant \n(en USD) en 2000") +
@@ -192,7 +204,7 @@ g1 <- ggplot(data = expectancy.2000,
         axis.title.y = element_text(size=11),
         panel.background = element_rect(fill = "white"),
         panel.grid.major = element_line(colour = "#CCCCCC"),
-        plot.margin = unit(c(1,1,1,1), "cm"))
+        plot.margin = unit(c(0,0,0,0), "cm"))
 
 g1
 ```
@@ -217,6 +229,16 @@ g2 <- ggplot(data = expectancy.2000,
   
   scale_x_continuous(limits=c(-5,7.5), breaks=seq(-5, 7.5, 2.5)) +
   
+  geom_vline(xintercept = 0, color="black", size=1) +
+  
+  geom_hline(yintercept = 0, color="black", size=1) +
+  
+  # annotate(geom = "text", 
+  #          x = 3000, y = 20, 
+  #          label = "x = 0",
+  #          color="black",
+  #          hjust = "left") +
+  
   labs(x = "Différence du pourcentage de dépenses \nen santé en pourcentage du GDP \nentre 2018 et 2000",
        y = "Différence d'espérance de vie \nentre 2018 et 2000",
        colour = "Espérance de vie \nen 2000",
@@ -229,7 +251,7 @@ g2 <- ggplot(data = expectancy.2000,
         axis.title.y = element_text(size=11),
         panel.background = element_rect(fill = "white"),
         panel.grid.major = element_line(colour = "#CCCCCC"),
-        plot.margin = unit(c(1,1,1,1), "cm")) 
+        plot.margin = unit(c(0,0,0,0), "cm")) 
 
 g2
 
@@ -257,19 +279,29 @@ g3 <- ggplot(data = expectancy.2000,
   
   scale_x_continuous(limits=c(-30, 5), breaks=seq(-30,5,5))+
   
-  labs(x = "Différence de pourcentage d'enfants de moins de \n5 ans atteints d'anémie \nentre 2018 et 2000",
+  geom_vline(xintercept = 0, color="black", size=1) +
+  
+  geom_hline(yintercept = 0, color="black", size=1) +
+  
+  # annotate(geom = "text", 
+  #          x = 3000, y = 20, 
+  #          label = "x = 0",
+  #          color="black",
+  #          hjust = "left") +
+  
+  labs(x = "Différence de pourcentage d'enfants de moins \nde 5 ans atteints d'anémie entre 2018 et 2000",
        y = "Différence d'espérance de vie \nentre 2018 et 2000",
        colour = "Espérance de vie \nen 2000",
        size = "% d'enfant atteints \nd'anémie en 2000") +
   
-  ggtitle("Représentation de la relation entre \nles différences d'espérance de vie et \n de l'anémie entre 2018 et 2000") +
+  ggtitle("Représentation de la relation entre \nles différences d'espérance de vie et \n de pourcentage d'enfants de moins de 5 ans \natteints d'anémie entre 2018 et 2000") +
   
   theme(plot.title = element_text(face="bold", hjust=0.5, size=12), 
         axis.title.x = element_text(size=11),
         axis.title.y = element_text(size=11),
         panel.background = element_rect(fill = "white"),
         panel.grid.major = element_line(colour = "#CCCCCC"),
-        plot.margin = unit(c(1,1,1,1), "cm"))
+        plot.margin = unit(c(0,0,0,0), "cm"))
 
 g3
 ```
@@ -292,24 +324,34 @@ g4 <- ggplot(data = expectancy.2000,
   
   scale_x_continuous(limits=c(-10,35), breaks=seq(-10, 30, 10)) +
   
+  geom_vline(xintercept = 0, color="black", size=1) +
+  
+  geom_hline(yintercept = 0, color="black", size=1) +
+  
+  # annotate(geom = "text", 
+  #          x = 3000, y = 20, 
+  #          label = "x = 0",
+  #          color="black",
+  #          hjust = "left") +
+  
   labs(x = "Différence du pourcentage de personnes \nayant accès à l'eau potable \nentre 2018 et 2000",
        y = "Différence d'espérance de vie \nentre 2018 et 2000",
        colour = "Espérance de vie \nen 2000",
        size = "% de personnes \nayant accès à l'eau \npotable en 2000") +
   
-  ggtitle("Représentation de la relation entre \nles différences d'espérance de vie et \n de l'eau potable entre 2018 et 2000") +
+  ggtitle("Représentation de la relation entre \nles différences d'espérance de vie et \n de pourcentage de personnes ayant accès \nà l'eau potable entre 2018 et 2000") +
   
   theme(plot.title = element_text(face="bold", hjust=0.5, size=12), 
         axis.title.x = element_text(size=11),
         axis.title.y = element_text(size=11),
         panel.background = element_rect(fill = "white"),
         panel.grid.major = element_line(colour = "#CCCCCC"),
-        plot.margin = unit(c(1,1,1,1), "cm"))
+        plot.margin = unit(c(0,0,0,0), "cm"))
 g4
 ```
 
 
-Visu 3
+Focus sur 3 pays
 =======================================================================
 
 Row
@@ -318,6 +360,9 @@ Row
 ### Syrie
 
 ```{r}
+dta$Life.expectancy<-round(dta$Life.expectancy,2)
+m <- list(l = 50, r = 50, b = 10, t = 70, pad = 4)
+
 dta_SYR <- subset(dta, ISO3 == "SYR")
 
 old.y <- list(
@@ -329,21 +374,21 @@ new.y <- list(
   overlaying = "y",
   side = "right",
   title ="Dépenses en santé (en % du GDP)",
-  range=c(3,5.5),
+  range=c(2.5,5.5),
   showgrid=F
 )
 
 fig1 <- plot_ly(dta_SYR) %>%
   
   add_lines(x = ~Year, y = ~Life.expectancy, yaxis="y1", name="Espérance de vie", 
-            line = list(color = 'black', width = 2)) %>%
+            line = list(color = 'black', width = 3)) %>%
   
-  add_lines(x = ~Year, y = ~Depense, yaxis = "y2", name="Dépenses en santé",
+  add_lines(x = ~Year, y = ~Depense, yaxis = "y2", name="Dépenses en santé \n% du GDP",
             line = list(color = '#00AFBB', width = 2)) %>%
   
-  layout(yaxis2 = new.y,
+  layout(yaxis2 = new.y, font=list(size=10),
          
-         yaxis = list(old.y, showgrid = T, title="Espérance de vie moyenne à la naissance \n (en années)"), 
+         yaxis = list(old.y, showgrid = T, title="Espérance de vie moyenne à \n la naissance (en années)"), 
          
          xaxis = list(title="Années", showgrid = F),
          
@@ -352,13 +397,13 @@ fig1 <- plot_ly(dta_SYR) %>%
          
          title = list(text = paste0("Evolution de l'espérance de vie de la Syrie", '<br>',
                                     '<sup>', "entre 2018 et 2000"),
-                      xanchor = 'left', x=0.1),
+                      xanchor = 'left', x=0.1, font=list(size=16)),
          
          shapes = list(
            list(type = "rect",
-                fillcolor = "lightblue", line = list(color = "lightblue"), opacity = 0.3,
+                fillcolor = "#009EFF", line = list(color = "lightblue"), opacity = 0.2,
                 x0 = "11", x1 = "18",
-                y0 = 68.5, y1 = 75))) %>%
+                y0 = 68.5, y1 = 75)), margin=m) %>%
   
   add_annotations(x = 14.5, y = 74.5, 
                   text  = "Guerre civile depuis 2011", 
@@ -371,9 +416,12 @@ fig1 <- plot_ly(dta_SYR) %>%
 fig1
 ```
 
-### Grenada
+### Grenade
 
 ```{r}
+dta_off$Life.expectancy<-round(dta_off$Life.expectancy,2)
+m <- list(l = 50, r = 50, b = 10, t = 70, pad = 4)
+
 vline <- function(x = 0, color = "green") {
   list(
     type = "line",
@@ -388,28 +436,28 @@ vline <- function(x = 0, color = "green") {
 
 fig2 <- plot_ly(dta_off[dta_off$ISO3 == "GRD",]) %>%
   
-  add_lines(x = ~Year, y = ~Life.expectancy, line = list(color = 'black', width = 2)) %>%
+  add_lines(x = ~Year, y = ~Life.expectancy, line = list(color = 'black', width = 3)) %>%
   
-  layout(xaxis = list(title="Années", showgrid = F),
+  layout(xaxis = list(title="Années", showgrid = F), font=list(size=10),
          
-         yaxis = list(title="Espérance de vie moyenne à la naissance \n (en années)"),
+         yaxis = list(title="Espérance de vie moyenne à \n la naissance (en années)", font=list(size=10)),
          
          legend = list(title=list(text=''), y = 73,
                        textfont = list(family = "Arial", size = 14, color = toRGB("black"))),
          
-         title = list(text = paste0("Evolution de l'espérance de vie de Grenada", '<br>',
+         title = list(text = paste0("Evolution de l'espérance de vie de Grenade", '<br>',
                                     '<sup>', "entre 2018 et 2000"),
-                      xanchor = 'left', x=0.1),
+                      xanchor = 'left', x=0.1, font=list(size=16)),
          
          # shapes = list(
          #   list(vline("4"), vline("5", col="#00AFBB")))
          
-         shapes = list(vline("4",col="black"), vline("5",col="#00AFBB"))) %>%
+         shapes = list(vline("4",col="black"), vline("5",col="#00AFBB")), margin=m) %>%
   
   add_text(showlegend = FALSE, 
            x = c("2002","2007"), y = c(73.16, 73.16),
            text = c("Ouragan Ivan","Ouragan Emily"),
-           textfont = list(family = "Arial", size = 16, color = list("black","#00AFBB")))
+           textfont = list(family = "Arial", size = 14, color = list("black","#00AFBB")))
 fig2
 ```
 
@@ -421,6 +469,8 @@ Row
 ### Venezuela
 
 ```{r, warning=F}
+m <- list(l = 50, r = 50, b = 10, t = 70, pad = 4)
+
 GDP_VEN <- read.csv("GDP_VEN.csv", sep=";")
 colnames(GDP_VEN) <- c("2000", "2001", "2002","2003", "2004", "2005","2006", "2007", "2008","2009","2010", "2011", "2012","2013", "2014", "2015","2016","2017","2018")
 GDP_VEN <- GDP_VEN %>% 
@@ -432,6 +482,7 @@ GDP_VEN$GDP_pred <- c(rep(NA,14),GDP_VEN$GDP[15:19])
 dta_dual_y <- data.frame(dta_off[dta_off$ISO3 == "VEN",])
 dta_dual_y$GDP_obs <- c(GDP_VEN$GDP[1:15], rep(NA,4))
 dta_dual_y$GDP_pred <- c(rep(NA,14),GDP_VEN$GDP[15:19])
+dta_dual_y$Life.expectancy<-round(dta_dual_y$Life.expectancy,2)
 
 old.y <- list(
   side = "left"
@@ -445,7 +496,7 @@ new.y <- list(
 
 fig3 <- plot_ly(dta_dual_y) %>%
   
-  add_lines(x = ~Year, y = ~Life.expectancy, yaxis="y1", name="Esperance de vie", 
+  add_lines(x = ~Year, y = ~Life.expectancy, yaxis="y1", name="Espérance de vie", 
             line = list(color = 'black', width = 3)) %>%
   
   add_lines(x = ~Year, y = ~GDP_obs, yaxis = "y2", name="GDP (données officielles)",
@@ -454,9 +505,9 @@ fig3 <- plot_ly(dta_dual_y) %>%
   add_lines(x = ~Year, y = ~GDP_pred, yaxis = "y2", name="GDP (données estimées)",
             line = list(color = '#00AFBB', width = 2, dash = 'dot')) %>%
   
-  layout(yaxis2 = new.y,
+  layout(yaxis2 = new.y,font=list(size=10),
          
-         yaxis = list(old.y, showgrid = F, title="Espérance de vie moyenne à la naissance \n (en années)"), 
+         yaxis = list(old.y, showgrid = F, title="Espérance de vie moyenne à \n la naissance (en années)"), 
          
          xaxis = list(title="Années", showgrid = F),
          
@@ -465,7 +516,7 @@ fig3 <- plot_ly(dta_dual_y) %>%
          
          title = list(text = paste0("Evolution de l'espérance de vie du Venezuela", '<br>',
                                     '<sup>', "entre 2018 et 2000"),
-                      xanchor = 'left', x=0.1),
+                      xanchor = 'left', x=0.1, font=list(size=16)),
          
          shapes = list(
            list(type = "rect",
@@ -475,12 +526,12 @@ fig3 <- plot_ly(dta_dual_y) %>%
            list(type = "rect",
                 fillcolor = "#009EFF", line = list(color = "#009EFF"), opacity = 0.2,
                 x0 = "13", x1 = "18",
-                y0 = 72, y1 = 73.5))) %>%
+                y0 = 72, y1 = 73.5)), margin=m) %>%
   
   add_text(showlegend = FALSE, 
-           x = c("2004","2016"), y = c(73.4, 73.4),
+           x = c("2006","2016"), y = c(73.25, 73.25),
            text = c("Présidence d'Hugo Chávez","Présidence de \nNicolás Maduro"),
-           textfont = list(family = "Arial", size = 14, color = toRGB("black")))
+           textfont = list(family = "Arial", size = 11, color = toRGB("black")))
 fig3
 ```
 
@@ -489,5 +540,3 @@ fig3
 ```{r}
 
 ```
-
-
